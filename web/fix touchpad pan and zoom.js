@@ -12,11 +12,17 @@ const { app } = ComfyUI_module
 
 //////////////////////////////
 
+const isMac = navigator.userAgent.includes("Mac OS X")
+const defaultProcessMouseWheel = LGraphCanvas.prototype.processMouseWheel
+if (isMac) LGraphCanvas.prototype.processMouseWheel = processMouseWheel
+
 /**
  * Smooth scrolling for touchpad
  */
-LGraphCanvas.prototype.processMouseWheel = function (/** @type {WheelEvent}*/ event) {
+function processMouseWheel(/** @type {WheelEvent}*/ event) {
   if (!this.graph || !this.allow_dragcanvas) return
+  // @ts-ignore, to be sure it is from touchpad, only works for Safari
+  if (!event.webkitDirectionInvertedFromDevice) return defaultProcessMouseWheel.call(this, event)
 
   const { clientX: x, clientY: y } = event
   if (this.viewport) {
